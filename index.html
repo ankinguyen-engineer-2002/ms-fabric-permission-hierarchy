@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Microsoft Fabric Permission Hierarchy — interactive reference cho 10 layers bao mat tu Tenant den Data-level Security.">
+  <meta name="theme-color" content="#080c14">
+  <title>Microsoft Fabric — Permission Hierarchy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ===== TOKENS ===== */
+    :root {
+      --bg:       #080c14;
+      --surface:  #0d1525;
+      --surface2: #111d34;
+      --border:   #1a2d52;
+      --border2:  #243a60;
+      --text:     #c8d8f0;
+      --muted:    #5a7aaa;
+      --accent:   #3b82f6;
+      --accent2:  #60a5fa;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --amber:    #f59e0b;
+      --purple:   #a78bfa;
+      --teal:     #2dd4bf;
+      --coral:    #f97316;
+      --font-mono:    'JetBrains Mono', monospace;
+      --font-display: 'Syne', sans-serif;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 10px;
+      --transition-fast: 0.2s ease;
+      --transition-expand: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== BASE ===== */
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent, transparent 2px,
+        rgba(255, 255, 255, 0.008) 2px,
+        rgba(255, 255, 255, 0.008) 4px
+      );
+    }
+
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== HEADER ===== */
+    .hdr {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .hdr-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hdr h1 {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 4vw, 26px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .hdr h1 span { color: var(--accent2); }
+
+    .hdr-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ===== LEGEND ===== */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 28px;
+      list-style: none;
+    }
+
+    .legend li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .leg-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ===== LAYER CARD (Accordion) ===== */
+    .layer { position: relative; margin-bottom: 6px; }
+
+    .layer-inner {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      background: var(--surface);
+    }
+
+    .layer-inner:hover {
+      border-color: var(--border2);
+      box-shadow: 0 0 0 1px var(--border2), 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .layer-inner[aria-expanded="true"] {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(59, 130, 246, 0.12);
+    }
+
+    .layer-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+      z-index: 1;
+    }
+
+    /* Trigger button — full-width clickable area */
+    .layer-trigger {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 16px 12px 20px;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      text-align: left;
+      outline: none;
+    }
+
+    .layer-trigger:focus-visible {
+      outline: 2px solid var(--accent2);
+      outline-offset: -2px;
+      border-radius: var(--radius-lg);
+    }
+
+    .layer-num {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      min-width: 22px;
+      letter-spacing: 0.1em;
+    }
+
+    .layer-icon {
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .layer-info { flex: 1; min-width: 0; }
+
+    .layer-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .layer-subtitle {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ===== BADGES ===== */
+    .badge {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .badge--preview  { background: rgba(245, 158, 11, 0.12); color: var(--amber);  border: 1px solid rgba(245, 158, 11, 0.25); }
+    .badge--critical { background: rgba(239, 68, 68, 0.12);  color: var(--red);    border: 1px solid rgba(239, 68, 68, 0.25); }
+    .badge--core     { background: rgba(59, 130, 246, 0.12);  color: var(--accent2); border: 1px solid rgba(59, 130, 246, 0.25); }
+    .badge--infra    { background: rgba(59, 130, 246, 0.12);  color: var(--accent2); border: 1px solid rgba(59, 130, 246, 0.25); }
+    .badge--gov      { background: rgba(45, 212, 191, 0.1);   color: var(--teal);   border: 1px solid rgba(45, 212, 191, 0.25); }
+    .badge--item     { background: rgba(249, 115, 22, 0.1);   color: var(--coral);  border: 1px solid rgba(249, 115, 22, 0.25); }
+    .badge--bi       { background: rgba(59, 130, 246, 0.12);  color: var(--accent2); border: 1px solid rgba(59, 130, 246, 0.25); }
+    .badge--wh       { background: rgba(59, 130, 246, 0.12);  color: var(--accent2); border: 1px solid rgba(59, 130, 246, 0.25); }
+    .badge--must     { background: rgba(239, 68, 68, 0.12);   color: var(--red);    border: 1px solid rgba(239, 68, 68, 0.25); }
+
+    /* Caret icon */
+    .caret {
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .layer-inner[aria-expanded="true"] .caret {
+      transform: rotate(180deg);
+    }
+
+    /* ===== DETAIL PANEL ===== */
+    .layer-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-expand), opacity 0.25s ease;
+      opacity: 0;
+    }
+
+    .layer-inner[aria-expanded="true"] .layer-detail { opacity: 1; }
+
+    .detail-inner {
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .detail-inner--single { grid-template-columns: 1fr; }
+
+    .detail-sec-title {
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    /* ===== TAGS ===== */
+    .tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .tag {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .tag--hi     { background: rgba(59, 130, 246, 0.1);  border-color: rgba(59, 130, 246, 0.3);  color: var(--accent2); }
+    .tag--warn   { background: rgba(245, 158, 11, 0.1);  border-color: rgba(245, 158, 11, 0.25); color: var(--amber); }
+    .tag--danger { background: rgba(239, 68, 68, 0.1);   border-color: rgba(239, 68, 68, 0.25);  color: var(--red); }
+    .tag--ok     { background: rgba(34, 197, 94, 0.1);   border-color: rgba(34, 197, 94, 0.25);  color: var(--green); }
+    .tag--purple { background: rgba(167, 139, 250, 0.1); border-color: rgba(167, 139, 250, 0.25);color: var(--purple); }
+    .tag--teal   { background: rgba(45, 212, 191, 0.1);  border-color: rgba(45, 212, 191, 0.25); color: var(--teal); }
+    .tag--coral  { background: rgba(249, 115, 22, 0.1);  border-color: rgba(249, 115, 22, 0.25); color: var(--coral); }
+
+    /* ===== RULES ===== */
+    .rule-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .rule {
+      font-size: 10px;
+      line-height: 1.5;
+      padding: 6px 10px;
+      border-radius: 5px;
+      background: var(--surface2);
+      border-left: 2px solid var(--border2);
+    }
+
+    .rule--ok     { border-left-color: var(--green); }
+    .rule--warn   { border-left-color: var(--amber); }
+    .rule--danger { border-left-color: var(--red); }
+
+    .rule-icon { margin-right: 4px; }
+
+    /* ===== ROLES GRID (L4) ===== */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .role-card {
+      padding: 8px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .role-card .rname {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .role-card .rperm {
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .role-card--admin       { border-color: rgba(239, 68, 68, 0.4);  background: rgba(239, 68, 68, 0.06); }
+    .role-card--member      { border-color: rgba(249, 115, 22, 0.3); background: rgba(249, 115, 22, 0.05); }
+    .role-card--contributor { border-color: rgba(59, 130, 246, 0.3);  background: rgba(59, 130, 246, 0.05); }
+    .role-card--viewer      { border-color: var(--border);            background: var(--surface2); }
+
+    /* ===== CONNECTOR ===== */
+    .connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 20px;
+      position: relative;
+    }
+
+    .conn-line {
+      width: 1px;
+      flex: 1;
+      background: linear-gradient(var(--border2), var(--border));
+    }
+
+    .conn-label {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 9px;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 0 6px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    /* ===== GOTCHA TABLE ===== */
+    .gotcha-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      margin-top: 8px;
+    }
+
+    .gotcha-table th {
+      text-align: left;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .gotcha-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(26, 45, 82, 0.5);
+      line-height: 1.5;
+      vertical-align: top;
+    }
+
+    .gotcha-table tr:last-child td { border-bottom: none; }
+    .gotcha-table td:first-child { color: var(--text); width: 55%; }
+    .gotcha-table td:last-child  { font-size: 9px; }
+
+    /* ===== ALERT BOX ===== */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-top: 12px;
+    }
+
+    .alert--danger {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    .alert-text {
+      font-size: 10px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .alert-text strong {
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    /* ===== SEPARATOR LABEL ===== */
+    .sep-label {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 8px 0;
+    }
+
+    /* ===== CROSS-CUTTING GRID ===== */
+    .cross-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .cross-grid .layer { margin-bottom: 0; }
+
+    .cross-grid .layer-trigger {
+      padding: 10px 14px 10px 18px;
+    }
+
+    .cross-grid .layer-num  { font-size: 9px; }
+    .cross-grid .layer-icon { font-size: 14px; }
+    .cross-grid .layer-title    { font-size: 12px; }
+    .cross-grid .layer-subtitle { font-size: 9px; }
+    .cross-grid .caret { width: 14px; height: 14px; }
+
+    .cross-grid .detail-inner { padding: 12px 16px; }
+
+    /* ===== BOTTOM TIP ===== */
+    .bottom-tip {
+      margin-top: 24px;
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      letter-spacing: 0.03em;
+    }
+
+    /* ===== UTILITIES ===== */
+    .spacer-sm { height: 8px; }
+    .spacer-md { height: 10px; }
+    .spacer-lg { height: 12px; }
+    .text-red   { color: var(--red); }
+    .text-green { color: var(--green); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      .wrap { padding: 16px 12px 32px; }
+      .detail-inner { grid-template-columns: 1fr !important; }
+      .roles-grid { grid-template-columns: repeat(2, 1fr); }
+      .cross-grid { grid-template-columns: 1fr; }
+      .gotcha-table td:first-child { width: auto; }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap" role="main">
+
+    <!-- Header -->
+    <header class="hdr">
+      <p class="hdr-label">Microsoft Fabric</p>
+      <h1>Permission <span>Hierarchy</span></h1>
+      <p class="hdr-sub">Click vao tung layer de xem chi tiet &middot; tu cao nhat den thap nhat</p>
+    </header>
+
+    <!-- Legend -->
+    <ul class="legend" aria-label="Legend">
+      <li><span class="leg-dot" style="background:#3b82f6" aria-hidden="true"></span>Cascade xuong auto</li>
+      <li><span class="leg-dot" style="background:#22c55e" aria-hidden="true"></span>Bo sung / song song</li>
+      <li><span class="leg-dot" style="background:#ef4444" aria-hidden="true"></span>Bypass / risk</li>
+      <li><span class="leg-dot" style="background:#f59e0b" aria-hidden="true"></span>Preview / caution</li>
+    </ul>
+
+    <!-- ==================== L1: TENANT ==================== -->
+    <section class="layer" id="l1">
+      <div class="layer-bar" style="background:var(--purple)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l1-detail" type="button">
+          <span class="layer-num">L1</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F3E2;</span>
+          <span class="layer-info">
+            <span class="layer-title">Tenant</span>
+            <span class="layer-subtitle">Microsoft Entra ID &middot; Fabric Admin Portal &middot; org-wide</span>
+          </span>
+          <span class="badge badge--critical">Highest</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l1-detail" role="region" aria-label="Tenant details">
+          <div class="detail-inner">
+            <div>
+              <h3 class="detail-sec-title">Roles &amp; Actors</h3>
+              <div class="tag-list">
+                <span class="tag tag--hi">Global Admin</span>
+                <span class="tag tag--hi">Fabric Admin</span>
+                <span class="tag tag--purple">Power Platform Admin</span>
+                <span class="tag">Billing Admin</span>
+              </div>
+              <div class="spacer-lg"></div>
+              <h3 class="detail-sec-title">Tenant Settings (Admin Portal)</h3>
+              <div class="tag-list">
+                <span class="tag">Enable Fabric</span>
+                <span class="tag">Export settings</span>
+                <span class="tag">Embed codes</span>
+                <span class="tag">Service principals</span>
+                <span class="tag">Guest user access</span>
+                <span class="tag">Certify datasets</span>
+              </div>
+            </div>
+            <div>
+              <h3 class="detail-sec-title">Cascade behavior</h3>
+              <div class="rule-list">
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Tenant settings cascade xuong toan bo org — quyet dinh feature nao user duoc phep dung</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Conditional Access (MFA, device, location, risk) enforce truoc khi vao bat ky workspace nao</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A1;</span>Fabric Admin co the override workspace settings trong mot so truong hop</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; toan org</div></div>
+
+    <!-- ==================== L2: CAPACITY ==================== -->
+    <section class="layer" id="l2">
+      <div class="layer-bar" style="background:var(--accent)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l2-detail" type="button">
+          <span class="layer-num">L2</span>
+          <span class="layer-icon" aria-hidden="true">&#x26A1;</span>
+          <span class="layer-info">
+            <span class="layer-title">Capacity</span>
+            <span class="layer-subtitle">F/P/EM SKU &middot; CU compute &middot; gan workspace &#x2192; capacity</span>
+          </span>
+          <span class="badge badge--infra">Infra</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l2-detail" role="region" aria-label="Capacity details">
+          <div class="detail-inner">
+            <div>
+              <h3 class="detail-sec-title">Capacity Admin co the</h3>
+              <div class="rule-list">
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Gan / bo workspace khoi capacity</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Pause / resume capacity</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Set autoscale, notification rules</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Khong co quyen vao data trong workspace</div>
+              </div>
+            </div>
+            <div>
+              <h3 class="detail-sec-title">Tac dong xuong duoi</h3>
+              <div class="rule-list">
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>Workspace khong co capacity = khong the refresh/publish Fabric items (Lakehouse, Warehouse, Pipeline)</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>SKU tier (F2 vs F64) quyet dinh compute limit — anh huong Spark session size, pipeline concurrency</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; workspace phu thuoc capacity</div></div>
+
+    <!-- ==================== L3: DOMAIN ==================== -->
+    <section class="layer" id="l3">
+      <div class="layer-bar" style="background:var(--teal)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l3-detail" type="button">
+          <span class="layer-num">L3</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F5C2;&#xFE0F;</span>
+          <span class="layer-info">
+            <span class="layer-title">Domain</span>
+            <span class="layer-subtitle">Logical grouping &middot; Data Mesh governance &middot; khong control data</span>
+          </span>
+          <span class="badge badge--gov">Governance</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l3-detail" role="region" aria-label="Domain details">
+          <div class="detail-inner detail-inner--single">
+            <div>
+              <h3 class="detail-sec-title">Tinh chat</h3>
+              <div class="rule-list">
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2248;</span>Orthogonal voi security — to chuc logic, khong them / bot quyen data thuc te</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Domain Admin: gan workspace vao domain, delegate governance</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Domain Admin KHONG co quyen vao workspace hay data — chi metadata</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Data Hub: user filter/tim data theo domain — discoverability</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; ranh gioi bao mat chinh</div></div>
+
+    <!-- ==================== L4: WORKSPACE ==================== -->
+    <section class="layer" id="l4">
+      <div class="layer-bar" style="background:var(--accent)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l4-detail" type="button">
+          <span class="layer-num">L4</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F4C1;</span>
+          <span class="layer-info">
+            <span class="layer-title">Workspace Roles</span>
+            <span class="layer-subtitle">Ranh gioi bao mat chinh &middot; 4 roles &middot; cascade xuong tat ca items</span>
+          </span>
+          <span class="badge badge--critical">Critical</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l4-detail" role="region" aria-label="Workspace Roles details">
+          <div class="detail-inner detail-inner--single">
+            <div>
+              <div class="roles-grid">
+                <div class="role-card role-card--admin">
+                  <div class="rname">Admin</div>
+                  <div class="rperm">Full control<br>Delete workspace<br>Manage all users<br>Write OneLake<br><span class="text-red">Bypass RLS/CLS</span></div>
+                </div>
+                <div class="role-card role-card--member">
+                  <div class="rname">Member</div>
+                  <div class="rperm">= Admin<br>tru delete WS<br>tru add Admin<br>Write OneLake<br><span class="text-red">Bypass RLS/CLS</span></div>
+                </div>
+                <div class="role-card role-card--contributor">
+                  <div class="rname">Contributor</div>
+                  <div class="rperm">Create/edit items<br>Run pipelines<br>NO manage users<br>Write OneLake<br><span class="text-red">Bypass RLS/CLS</span></div>
+                </div>
+                <div class="role-card role-card--viewer">
+                  <div class="rname">Viewer</div>
+                  <div class="rperm">View items<br>SQL endpoint<br>Execute pipelines<br>NO Spark run<br><span class="text-green">RLS/CLS enforce</span></div>
+                </div>
+              </div>
+              <div class="alert alert--danger">
+                <span class="alert-icon" aria-hidden="true">&#x26A0;&#xFE0F;</span>
+                <p class="alert-text"><strong>Critical:</strong> Admin / Member / Contributor tu dong co Write permission len OneLake — <strong>bypass hoan toan</strong> OneLake Security (RLS, CLS, OLS). Policy data-level chi co tac dung voi <strong>Viewer</strong> hoac user duoc share item truc tiep (khong co workspace role).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">bo sung &#x2195; cap quyen tung item rieng le</div></div>
+
+    <!-- ==================== L5: ITEM-LEVEL ==================== -->
+    <section class="layer" id="l5">
+      <div class="layer-bar" style="background:var(--coral)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l5-detail" type="button">
+          <span class="layer-num">L5</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F4E6;</span>
+          <span class="layer-info">
+            <span class="layer-title">Item-Level Permissions</span>
+            <span class="layer-subtitle">Chia se tung item cho user ngoai workspace &middot; khong cap workspace access</span>
+          </span>
+          <span class="badge badge--item">Item</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l5-detail" role="region" aria-label="Item-Level Permissions details">
+          <div class="detail-inner">
+            <div>
+              <h3 class="detail-sec-title">Lakehouse permissions</h3>
+              <div class="tag-list">
+                <span class="tag tag--hi">ReadAll (Spark)</span>
+                <span class="tag tag--hi">ReadAll (SQL endpoint)</span>
+                <span class="tag tag--teal">Reshare</span>
+                <span class="tag tag--teal">Build</span>
+              </div>
+              <div class="spacer-md"></div>
+              <h3 class="detail-sec-title">Warehouse permissions</h3>
+              <div class="tag-list">
+                <span class="tag">Read</span>
+                <span class="tag">ReadData</span>
+                <span class="tag tag--hi">ReadAll</span>
+                <span class="tag tag--warn">Write</span>
+                <span class="tag tag--teal">Reshare</span>
+                <span class="tag tag--teal">Build</span>
+              </div>
+            </div>
+            <div>
+              <h3 class="detail-sec-title">Semantic Model</h3>
+              <div class="tag-list">
+                <span class="tag">Read</span>
+                <span class="tag tag--hi">Build</span>
+                <span class="tag tag--teal">Reshare</span>
+                <span class="tag tag--warn">Write</span>
+              </div>
+              <div class="spacer-md"></div>
+              <h3 class="detail-sec-title">Report / Dashboard</h3>
+              <div class="tag-list">
+                <span class="tag">View</span>
+                <span class="tag tag--teal">Reshare</span>
+                <span class="tag tag--warn">Edit</span>
+                <span class="tag">Share link</span>
+              </div>
+              <div class="spacer-md"></div>
+              <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>ReadAll SQL &#x2260; ReadAll Spark — can cap dung loai tuy access path</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data-layer separator -->
+    <div class="spacer-sm"></div>
+    <p class="sep-label" aria-hidden="true">&#x2500;&#x2500; Data-layer security (song song, khong thay the nhau) &#x2500;&#x2500;</p>
+
+    <!-- ==================== L6: ONELAKE SECURITY ==================== -->
+    <section class="layer" id="l6">
+      <div class="layer-bar" style="background:var(--green)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l6-detail" type="button">
+          <span class="layer-num">L6</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F510;</span>
+          <span class="layer-info">
+            <span class="layer-title">OneLake Security (RBAC)</span>
+            <span class="layer-subtitle">Folder/Table-level &middot; RLS &middot; CLS &middot; OLS &middot; enforce qua moi engine</span>
+          </span>
+          <span class="badge badge--preview">&#x26A0; Preview</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l6-detail" role="region" aria-label="OneLake Security details">
+          <div class="detail-inner">
+            <div>
+              <h3 class="detail-sec-title">Permissions ho tro</h3>
+              <div class="tag-list">
+                <span class="tag tag--hi">Read (table/folder)</span>
+                <span class="tag tag--warn">ReadWrite (Preview)</span>
+                <span class="tag tag--teal">RLS (row filter)</span>
+                <span class="tag tag--teal">CLS (column list)</span>
+                <span class="tag tag--purple">OLS (table/schema)</span>
+              </div>
+              <div class="spacer-md"></div>
+              <h3 class="detail-sec-title">Combination logic</h3>
+              <div class="rule-list">
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x222A;</span><strong>Multiple roles &#x2192; UNION</strong> (least-restrictive). Role A full table + Role B RLS = full access wins</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2229;</span>Trong 1 role: RLS &#x2229; CLS &#x2229; OLS (intersection)</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">OR</span>Nhieu roles cung RLS: predicate noi OR</div>
+              </div>
+            </div>
+            <div>
+              <h3 class="detail-sec-title">Luu y quan trong</h3>
+              <div class="rule-list">
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>Admin/Member/Contributor bypass hoan toan — chi Viewer bi enforce</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Khi enable: DefaultReader role auto-tao. Phai xoa hoac remove ReadAll khoi user cu</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Khong the tat sau khi bat — per-item opt-in</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Ap dung dong nhat: Spark, SQL endpoint, Power BI, OneLake API</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== L7: WAREHOUSE SQL ==================== -->
+    <section class="layer" id="l7">
+      <div class="layer-bar" style="background:var(--coral)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l7-detail" type="button">
+          <span class="layer-num">L7</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F3ED;</span>
+          <span class="layer-info">
+            <span class="layer-title">Warehouse SQL Security (T-SQL)</span>
+            <span class="layer-subtitle">GRANT / DENY / REVOKE &middot; RLS &middot; CLS &middot; DDM &middot; Object-Level</span>
+          </span>
+          <span class="badge badge--wh">Warehouse</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l7-detail" role="region" aria-label="Warehouse SQL Security details">
+          <div class="detail-inner">
+            <div>
+              <h3 class="detail-sec-title">Cong cu T-SQL</h3>
+              <div class="tag-list">
+                <span class="tag tag--hi">GRANT / REVOKE</span>
+                <span class="tag tag--danger">DENY (override GRANT)</span>
+                <span class="tag tag--teal">CREATE SECURITY POLICY (RLS)</span>
+                <span class="tag tag--teal">GRANT SELECT (column list)</span>
+                <span class="tag tag--purple">ALTER TABLE MASKED (DDM)</span>
+                <span class="tag">Views &middot; SPs &middot; Functions</span>
+              </div>
+            </div>
+            <div>
+              <h3 class="detail-sec-title">Khac biet vs OneLake Security</h3>
+              <div class="rule-list">
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x26A1;</span><strong>DENY override GRANT</strong> — nguoc voi OneLake (most permissive wins)</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>DDM ho tro — OneLake Security khong co DDM</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Workspace Admin bypass T-SQL DENY</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Views/SPs co the dung SQL GRANT doc lap voi table permission</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== L8: SEMANTIC MODEL ==================== -->
+    <section class="layer" id="l8">
+      <div class="layer-bar" style="background:var(--amber)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="l8-detail" type="button">
+          <span class="layer-num">L8</span>
+          <span class="layer-icon" aria-hidden="true">&#x1F4CA;</span>
+          <span class="layer-info">
+            <span class="layer-title">Semantic Model Security (Power BI)</span>
+            <span class="layer-subtitle">RLS DAX &middot; OLS &middot; CLS &middot; Direct Lake mode behavior</span>
+          </span>
+          <span class="badge badge--bi">BI Layer</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="l8-detail" role="region" aria-label="Semantic Model Security details">
+          <div class="detail-inner">
+            <div>
+              <h3 class="detail-sec-title">Security types</h3>
+              <div class="tag-list">
+                <span class="tag tag--hi">RLS (DAX row filter)</span>
+                <span class="tag tag--teal">OLS (hide table/column)</span>
+                <span class="tag tag--purple">CLS (column restrict)</span>
+              </div>
+              <div class="spacer-md"></div>
+              <h3 class="detail-sec-title">Direct Lake mode gotcha</h3>
+              <div class="rule-list">
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A1;</span>Direct Lake: RLS enforce tai semantic model — khong di qua OneLake Security</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>DirectLake over SQL mode: identity owner's credentials — khong pass user identity qua shortcut</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>DirectLake over OneLake mode: user identity pass through dung</div>
+              </div>
+            </div>
+            <div>
+              <h3 class="detail-sec-title">Build permission risk</h3>
+              <div class="rule-list">
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>User co Build permission &#x2192; connect truc tiep vao dataset &#x2192; bypass RLS cua report</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>RLS enforce o model level van ap dung ke ca khi build custom report</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>OLS an table/column khoi schema — khong han la security layer that su</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cross-cutting separator -->
+    <div class="spacer-sm"></div>
+    <p class="sep-label" aria-hidden="true">&#x2500;&#x2500; Cross-cutting / platform &#x2500;&#x2500;</p>
+
+    <!-- Cross-cutting grid -->
+    <div class="cross-grid">
+
+      <!-- L9: CONDITIONAL ACCESS -->
+      <section class="layer" id="l9">
+        <div class="layer-bar" style="background:var(--purple)" aria-hidden="true"></div>
+        <div class="layer-inner" aria-expanded="false">
+          <button class="layer-trigger" aria-controls="l9-detail" type="button">
+            <span class="layer-num">L9</span>
+            <span class="layer-icon" aria-hidden="true">&#x1F6E1;&#xFE0F;</span>
+            <span class="layer-info">
+              <span class="layer-title">Conditional Access</span>
+              <span class="layer-subtitle">Entra ID &middot; MFA &middot; device</span>
+            </span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="layer-detail" id="l9-detail" role="region" aria-label="Conditional Access details">
+            <div class="detail-inner detail-inner--single">
+              <div class="tag-list">
+                <span class="tag tag--purple">MFA required</span>
+                <span class="tag">Device compliance</span>
+                <span class="tag">IP location</span>
+                <span class="tag tag--warn">Sign-in risk</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- L10: KEY VAULT -->
+      <section class="layer" id="l10">
+        <div class="layer-bar" style="background:var(--muted)" aria-hidden="true"></div>
+        <div class="layer-inner" aria-expanded="false">
+          <button class="layer-trigger" aria-controls="l10-detail" type="button">
+            <span class="layer-num">L10</span>
+            <span class="layer-icon" aria-hidden="true">&#x1F511;</span>
+            <span class="layer-info">
+              <span class="layer-title">Azure Key Vault</span>
+              <span class="layer-subtitle">Secrets &middot; credentials</span>
+            </span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="layer-detail" id="l10-detail" role="region" aria-label="Azure Key Vault details">
+            <div class="detail-inner detail-inner--single">
+              <div class="tag-list">
+                <span class="tag">Connection strings</span>
+                <span class="tag">Client secrets</span>
+                <span class="tag tag--hi">notebookutils.credentials</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ==================== GOTCHA TABLE ==================== -->
+    <section class="layer" id="lg" style="margin-top: 20px">
+      <div class="layer-bar" style="background:var(--red)" aria-hidden="true"></div>
+      <div class="layer-inner" aria-expanded="false">
+        <button class="layer-trigger" aria-controls="lg-detail" type="button">
+          <span class="layer-icon" aria-hidden="true">&#x1F4A5;</span>
+          <span class="layer-info">
+            <span class="layer-title">Common Gotchas — nhung cai de dinh</span>
+            <span class="layer-subtitle">8 tinh huong thuc te hay bi nham</span>
+          </span>
+          <span class="badge badge--must">Must read</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="layer-detail" id="lg-detail" role="region" aria-label="Common Gotchas details">
+          <div class="detail-inner detail-inner--single">
+            <table class="gotcha-table">
+              <thead>
+                <tr><th scope="col">Tinh huong</th><th scope="col">Ket qua thuc te</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>WS Viewer + khong share Lakehouse item</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Khong thay data</span></td>
+                </tr>
+                <tr>
+                  <td>Share Lakehouse (ReadAll SQL) cho user khong co WS role</td>
+                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; Query duoc qua SQL endpoint only</span></td>
+                </tr>
+                <tr>
+                  <td>WS Contributor + set OneLake RLS restrict rows</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Contributor bypass, thay full data</span></td>
+                </tr>
+                <tr>
+                  <td>WS Viewer + OneLake RLS role restrict rows</td>
+                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; RLS enforce dung</span></td>
+                </tr>
+                <tr>
+                  <td>Semantic Model RLS + user co Build permission</td>
+                  <td><span class="tag tag--warn" style="font-size:9px">&#x26A0; Build &#x2192; connect direct &#x2192; bypass RLS report</span></td>
+                </tr>
+                <tr>
+                  <td>Warehouse DENY + user la WS Admin</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Admin bypass T-SQL DENY</span></td>
+                </tr>
+                <tr>
+                  <td>OneLake: Role A full table + Role B RLS</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; UNION &#x2192; full access wins, RLS ignored</span></td>
+                </tr>
+                <tr>
+                  <td>Share Report, khong share Semantic Model</td>
+                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; User xem report nhung khong build moi</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="bottom-tip">Click vao bat ky layer nao de expand &middot; moi layer deu doc lap, co the expand dong thoi</p>
+
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      /**
+       * Toggle accordion panel open/closed.
+       * Uses aria-expanded for state, CSS transitions for animation.
+       */
+      function toggle(layerEl) {
+        const inner  = layerEl.querySelector('.layer-inner');
+        const detail = layerEl.querySelector('.layer-detail');
+        const isOpen = inner.getAttribute('aria-expanded') === 'true';
+
+        inner.setAttribute('aria-expanded', String(!isOpen));
+
+        if (!isOpen) {
+          detail.style.maxHeight = detail.scrollHeight + 'px';
+        } else {
+          detail.style.maxHeight = '0';
+        }
+      }
+
+      // Event delegation — single listener on <main>
+      const main = document.querySelector('.wrap');
+      main.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.layer-trigger');
+        if (!trigger) return;
+        const layer = trigger.closest('.layer');
+        if (layer) toggle(layer);
+      });
+
+      // Keyboard: Enter/Space on trigger
+      main.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const trigger = e.target.closest('.layer-trigger');
+        if (!trigger) return;
+        e.preventDefault();
+        const layer = trigger.closest('.layer');
+        if (layer) toggle(layer);
+      });
+
+      // Open L4 (Workspace Roles) by default
+      requestAnimationFrame(() => {
+        const l4 = document.getElementById('l4');
+        if (l4) toggle(l4);
+      });
+    })();
+  </script>
+</body>
+</html>
