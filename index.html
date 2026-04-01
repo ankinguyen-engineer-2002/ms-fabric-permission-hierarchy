@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Microsoft Fabric Permission Hierarchy — interactive reference cho 10 layers bao mat tu Tenant den Data-level Security.">
+  <meta name="description" content="Microsoft Fabric Permission Hierarchy — interactive reference for 10 security layers from Tenant to Data-level Security.">
   <meta name="theme-color" content="#080c14">
   <title>Microsoft Fabric — Permission Hierarchy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -511,13 +511,13 @@
     <header class="hdr">
       <p class="hdr-label">Microsoft Fabric</p>
       <h1>Permission <span>Hierarchy</span></h1>
-      <p class="hdr-sub">Click vao tung layer de xem chi tiet &middot; tu cao nhat den thap nhat</p>
+      <p class="hdr-sub">Click any layer to view details &middot; from highest to lowest</p>
     </header>
 
     <!-- Legend -->
     <ul class="legend" aria-label="Legend">
-      <li><span class="leg-dot" style="background:#3b82f6" aria-hidden="true"></span>Cascade xuong auto</li>
-      <li><span class="leg-dot" style="background:#22c55e" aria-hidden="true"></span>Bo sung / song song</li>
+      <li><span class="leg-dot" style="background:#3b82f6" aria-hidden="true"></span>Auto cascade down</li>
+      <li><span class="leg-dot" style="background:#22c55e" aria-hidden="true"></span>Additive / parallel</li>
       <li><span class="leg-dot" style="background:#ef4444" aria-hidden="true"></span>Bypass / risk</li>
       <li><span class="leg-dot" style="background:#f59e0b" aria-hidden="true"></span>Preview / caution</li>
     </ul>
@@ -560,9 +560,9 @@
             <div>
               <h3 class="detail-sec-title">Cascade behavior</h3>
               <div class="rule-list">
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Tenant settings cascade xuong toan bo org — quyet dinh feature nao user duoc phep dung</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Conditional Access (MFA, device, location, risk) enforce truoc khi vao bat ky workspace nao</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A1;</span>Fabric Admin co the override workspace settings trong mot so truong hop</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Tenant settings cascade to the entire org — determines which features users can use</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Conditional Access (MFA, device, location, risk) enforced before entering any workspace</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A1;</span>Fabric Admin can override workspace settings in certain cases</div>
               </div>
             </div>
           </div>
@@ -570,7 +570,7 @@
       </div>
     </section>
 
-    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; toan org</div></div>
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; entire org</div></div>
 
     <!-- ==================== L2: CAPACITY ==================== -->
     <section class="layer" id="l2">
@@ -581,7 +581,7 @@
           <span class="layer-icon" aria-hidden="true">&#x26A1;</span>
           <span class="layer-info">
             <span class="layer-title">Capacity</span>
-            <span class="layer-subtitle">F/P/EM SKU &middot; CU compute &middot; gan workspace &#x2192; capacity</span>
+            <span class="layer-subtitle">F/P/EM SKU &middot; CU compute &middot; assign workspace &#x2192; capacity</span>
           </span>
           <span class="badge badge--infra">Infra</span>
           <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -589,19 +589,19 @@
         <div class="layer-detail" id="l2-detail" role="region" aria-label="Capacity details">
           <div class="detail-inner">
             <div>
-              <h3 class="detail-sec-title">Capacity Admin co the</h3>
+              <h3 class="detail-sec-title">Capacity Admin can</h3>
               <div class="rule-list">
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Gan / bo workspace khoi capacity</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Assign / remove workspaces from capacity</div>
                 <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Pause / resume capacity</div>
                 <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Set autoscale, notification rules</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Khong co quyen vao data trong workspace</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>No access to data within workspaces</div>
               </div>
             </div>
             <div>
-              <h3 class="detail-sec-title">Tac dong xuong duoi</h3>
+              <h3 class="detail-sec-title">Downstream impact</h3>
               <div class="rule-list">
-                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>Workspace khong co capacity = khong the refresh/publish Fabric items (Lakehouse, Warehouse, Pipeline)</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>SKU tier (F2 vs F64) quyet dinh compute limit — anh huong Spark session size, pipeline concurrency</div>
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>Workspace without capacity = cannot refresh/publish Fabric items (Lakehouse, Warehouse, Pipeline)</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>SKU tier (F2 vs F64) determines compute limit — affects Spark session size, pipeline concurrency</div>
               </div>
             </div>
           </div>
@@ -609,7 +609,7 @@
       </div>
     </section>
 
-    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; workspace phu thuoc capacity</div></div>
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; workspace depends on capacity</div></div>
 
     <!-- ==================== L3: DOMAIN ==================== -->
     <section class="layer" id="l3">
@@ -620,7 +620,7 @@
           <span class="layer-icon" aria-hidden="true">&#x1F5C2;&#xFE0F;</span>
           <span class="layer-info">
             <span class="layer-title">Domain</span>
-            <span class="layer-subtitle">Logical grouping &middot; Data Mesh governance &middot; khong control data</span>
+            <span class="layer-subtitle">Logical grouping &middot; Data Mesh governance &middot; no data control</span>
           </span>
           <span class="badge badge--gov">Governance</span>
           <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -628,12 +628,12 @@
         <div class="layer-detail" id="l3-detail" role="region" aria-label="Domain details">
           <div class="detail-inner detail-inner--single">
             <div>
-              <h3 class="detail-sec-title">Tinh chat</h3>
+              <h3 class="detail-sec-title">Characteristics</h3>
               <div class="rule-list">
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2248;</span>Orthogonal voi security — to chuc logic, khong them / bot quyen data thuc te</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Domain Admin: gan workspace vao domain, delegate governance</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Domain Admin KHONG co quyen vao workspace hay data — chi metadata</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Data Hub: user filter/tim data theo domain — discoverability</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2248;</span>Orthogonal to security — logical organization, does not add/remove actual data permissions</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Domain Admin: assign workspaces to domain, delegate governance</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Domain Admin has NO access to workspace or data — metadata only</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x25BC;</span>Data Hub: users filter/search data by domain — discoverability</div>
               </div>
             </div>
           </div>
@@ -641,7 +641,7 @@
       </div>
     </section>
 
-    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; ranh gioi bao mat chinh</div></div>
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">cascade &#x2193; primary security boundary</div></div>
 
     <!-- ==================== L4: WORKSPACE ==================== -->
     <section class="layer" id="l4">
@@ -652,7 +652,7 @@
           <span class="layer-icon" aria-hidden="true">&#x1F4C1;</span>
           <span class="layer-info">
             <span class="layer-title">Workspace Roles</span>
-            <span class="layer-subtitle">Ranh gioi bao mat chinh &middot; 4 roles &middot; cascade xuong tat ca items</span>
+            <span class="layer-subtitle">Primary security boundary &middot; 4 roles &middot; cascades down to all items</span>
           </span>
           <span class="badge badge--critical">Critical</span>
           <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -667,7 +667,7 @@
                 </div>
                 <div class="role-card role-card--member">
                   <div class="rname">Member</div>
-                  <div class="rperm">= Admin<br>tru delete WS<br>tru add Admin<br>Write OneLake<br><span class="text-red">Bypass RLS/CLS</span></div>
+                  <div class="rperm">= Admin<br>except delete WS<br>except add Admin<br>Write OneLake<br><span class="text-red">Bypass RLS/CLS</span></div>
                 </div>
                 <div class="role-card role-card--contributor">
                   <div class="rname">Contributor</div>
@@ -680,7 +680,7 @@
               </div>
               <div class="alert alert--danger">
                 <span class="alert-icon" aria-hidden="true">&#x26A0;&#xFE0F;</span>
-                <p class="alert-text"><strong>Critical:</strong> Admin / Member / Contributor tu dong co Write permission len OneLake — <strong>bypass hoan toan</strong> OneLake Security (RLS, CLS, OLS). Policy data-level chi co tac dung voi <strong>Viewer</strong> hoac user duoc share item truc tiep (khong co workspace role).</p>
+                <p class="alert-text"><strong>Critical:</strong> Admin / Member / Contributor automatically have Write permission on OneLake — <strong>completely bypass</strong> OneLake Security (RLS, CLS, OLS). Data-level policies only apply to <strong>Viewer</strong> or users with direct item sharing (no workspace role).</p>
               </div>
             </div>
           </div>
@@ -688,7 +688,7 @@
       </div>
     </section>
 
-    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">bo sung &#x2195; cap quyen tung item rieng le</div></div>
+    <div class="connector" aria-hidden="true"><div class="conn-line"></div><div class="conn-label">additive &#x2195; per-item permission grants</div></div>
 
     <!-- ==================== L5: ITEM-LEVEL ==================== -->
     <section class="layer" id="l5">
@@ -699,7 +699,7 @@
           <span class="layer-icon" aria-hidden="true">&#x1F4E6;</span>
           <span class="layer-info">
             <span class="layer-title">Item-Level Permissions</span>
-            <span class="layer-subtitle">Chia se tung item cho user ngoai workspace &middot; khong cap workspace access</span>
+            <span class="layer-subtitle">Share individual items to users outside workspace &middot; no workspace access granted</span>
           </span>
           <span class="badge badge--item">Item</span>
           <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -742,7 +742,7 @@
                 <span class="tag">Share link</span>
               </div>
               <div class="spacer-md"></div>
-              <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>ReadAll SQL &#x2260; ReadAll Spark — can cap dung loai tuy access path</div>
+              <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>ReadAll SQL &#x2260; ReadAll Spark — must grant the correct type based on access path</div>
             </div>
           </div>
         </div>
@@ -751,7 +751,7 @@
 
     <!-- Data-layer separator -->
     <div class="spacer-sm"></div>
-    <p class="sep-label" aria-hidden="true">&#x2500;&#x2500; Data-layer security (song song, khong thay the nhau) &#x2500;&#x2500;</p>
+    <p class="sep-label" aria-hidden="true">&#x2500;&#x2500; Data-layer security (parallel, do not replace each other) &#x2500;&#x2500;</p>
 
     <!-- ==================== L6: ONELAKE SECURITY ==================== -->
     <section class="layer" id="l6">
@@ -762,7 +762,7 @@
           <span class="layer-icon" aria-hidden="true">&#x1F510;</span>
           <span class="layer-info">
             <span class="layer-title">OneLake Security (RBAC)</span>
-            <span class="layer-subtitle">Folder/Table-level &middot; RLS &middot; CLS &middot; OLS &middot; enforce qua moi engine</span>
+            <span class="layer-subtitle">Folder/Table-level &middot; RLS &middot; CLS &middot; OLS &middot; enforced across all engines</span>
           </span>
           <span class="badge badge--preview">&#x26A0; Preview</span>
           <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -770,7 +770,7 @@
         <div class="layer-detail" id="l6-detail" role="region" aria-label="OneLake Security details">
           <div class="detail-inner">
             <div>
-              <h3 class="detail-sec-title">Permissions ho tro</h3>
+              <h3 class="detail-sec-title">Supported permissions</h3>
               <div class="tag-list">
                 <span class="tag tag--hi">Read (table/folder)</span>
                 <span class="tag tag--warn">ReadWrite (Preview)</span>
@@ -782,17 +782,17 @@
               <h3 class="detail-sec-title">Combination logic</h3>
               <div class="rule-list">
                 <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x222A;</span><strong>Multiple roles &#x2192; UNION</strong> (least-restrictive). Role A full table + Role B RLS = full access wins</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2229;</span>Trong 1 role: RLS &#x2229; CLS &#x2229; OLS (intersection)</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">OR</span>Nhieu roles cung RLS: predicate noi OR</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2229;</span>Within 1 role: RLS &#x2229; CLS &#x2229; OLS (intersection)</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">OR</span>Multiple roles with RLS: predicates joined with OR</div>
               </div>
             </div>
             <div>
-              <h3 class="detail-sec-title">Luu y quan trong</h3>
+              <h3 class="detail-sec-title">Important notes</h3>
               <div class="rule-list">
-                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>Admin/Member/Contributor bypass hoan toan — chi Viewer bi enforce</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Khi enable: DefaultReader role auto-tao. Phai xoa hoac remove ReadAll khoi user cu</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Khong the tat sau khi bat — per-item opt-in</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Ap dung dong nhat: Spark, SQL endpoint, Power BI, OneLake API</div>
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>Admin/Member/Contributor bypass completely — only Viewer is enforced</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>When enabled: DefaultReader role is auto-created. Must delete or remove ReadAll from existing users</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Cannot be disabled once enabled — per-item opt-in</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Enforced uniformly: Spark, SQL endpoint, Power BI, OneLake API</div>
               </div>
             </div>
           </div>
@@ -817,7 +817,7 @@
         <div class="layer-detail" id="l7-detail" role="region" aria-label="Warehouse SQL Security details">
           <div class="detail-inner">
             <div>
-              <h3 class="detail-sec-title">Cong cu T-SQL</h3>
+              <h3 class="detail-sec-title">T-SQL tools</h3>
               <div class="tag-list">
                 <span class="tag tag--hi">GRANT / REVOKE</span>
                 <span class="tag tag--danger">DENY (override GRANT)</span>
@@ -828,12 +828,12 @@
               </div>
             </div>
             <div>
-              <h3 class="detail-sec-title">Khac biet vs OneLake Security</h3>
+              <h3 class="detail-sec-title">Differences vs OneLake Security</h3>
               <div class="rule-list">
-                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x26A1;</span><strong>DENY override GRANT</strong> — nguoc voi OneLake (most permissive wins)</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>DDM ho tro — OneLake Security khong co DDM</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Workspace Admin bypass T-SQL DENY</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Views/SPs co the dung SQL GRANT doc lap voi table permission</div>
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x26A1;</span><strong>DENY overrides GRANT</strong> — opposite of OneLake (most permissive wins)</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>DDM supported — OneLake Security has no DDM</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>Workspace Admin bypasses T-SQL DENY</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>Views/SPs can use SQL GRANT independently of table permissions</div>
               </div>
             </div>
           </div>
@@ -867,17 +867,17 @@
               <div class="spacer-md"></div>
               <h3 class="detail-sec-title">Direct Lake mode gotcha</h3>
               <div class="rule-list">
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A1;</span>Direct Lake: RLS enforce tai semantic model — khong di qua OneLake Security</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>DirectLake over SQL mode: identity owner's credentials — khong pass user identity qua shortcut</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>DirectLake over OneLake mode: user identity pass through dung</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A1;</span>Direct Lake: RLS enforced at semantic model — does not go through OneLake Security</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>DirectLake over SQL mode: uses owner's credentials — does not pass user identity through shortcut</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>DirectLake over OneLake mode: user identity passes through correctly</div>
               </div>
             </div>
             <div>
               <h3 class="detail-sec-title">Build permission risk</h3>
               <div class="rule-list">
-                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>User co Build permission &#x2192; connect truc tiep vao dataset &#x2192; bypass RLS cua report</div>
-                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>RLS enforce o model level van ap dung ke ca khi build custom report</div>
-                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>OLS an table/column khoi schema — khong han la security layer that su</div>
+                <div class="rule rule--danger"><span class="rule-icon" aria-hidden="true">&#x274C;</span>User with Build permission &#x2192; connect directly to dataset &#x2192; bypass report-level RLS</div>
+                <div class="rule rule--ok"><span class="rule-icon" aria-hidden="true">&#x2713;</span>RLS at model level still applies even when building custom reports</div>
+                <div class="rule rule--warn"><span class="rule-icon" aria-hidden="true">&#x26A0;</span>OLS hides table/column from schema — not a true security layer</div>
               </div>
             </div>
           </div>
@@ -952,8 +952,8 @@
         <button class="layer-trigger" aria-controls="lg-detail" type="button">
           <span class="layer-icon" aria-hidden="true">&#x1F4A5;</span>
           <span class="layer-info">
-            <span class="layer-title">Common Gotchas — nhung cai de dinh</span>
-            <span class="layer-subtitle">8 tinh huong thuc te hay bi nham</span>
+            <span class="layer-title">Common Gotchas — easy to get wrong</span>
+            <span class="layer-subtitle">8 real-world scenarios often misunderstood</span>
           </span>
           <span class="badge badge--must">Must read</span>
           <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -962,40 +962,40 @@
           <div class="detail-inner detail-inner--single">
             <table class="gotcha-table">
               <thead>
-                <tr><th scope="col">Tinh huong</th><th scope="col">Ket qua thuc te</th></tr>
+                <tr><th scope="col">Scenario</th><th scope="col">Actual result</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>WS Viewer + khong share Lakehouse item</td>
-                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Khong thay data</span></td>
+                  <td>WS Viewer + Lakehouse item not shared</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Cannot see data</span></td>
                 </tr>
                 <tr>
-                  <td>Share Lakehouse (ReadAll SQL) cho user khong co WS role</td>
-                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; Query duoc qua SQL endpoint only</span></td>
+                  <td>Share Lakehouse (ReadAll SQL) to user without WS role</td>
+                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; Can query via SQL endpoint only</span></td>
                 </tr>
                 <tr>
-                  <td>WS Contributor + set OneLake RLS restrict rows</td>
-                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Contributor bypass, thay full data</span></td>
+                  <td>WS Contributor + OneLake RLS restricting rows</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Contributor bypasses, sees full data</span></td>
                 </tr>
                 <tr>
-                  <td>WS Viewer + OneLake RLS role restrict rows</td>
-                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; RLS enforce dung</span></td>
+                  <td>WS Viewer + OneLake RLS role restricting rows</td>
+                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; RLS enforced correctly</span></td>
                 </tr>
                 <tr>
-                  <td>Semantic Model RLS + user co Build permission</td>
-                  <td><span class="tag tag--warn" style="font-size:9px">&#x26A0; Build &#x2192; connect direct &#x2192; bypass RLS report</span></td>
+                  <td>Semantic Model RLS + user has Build permission</td>
+                  <td><span class="tag tag--warn" style="font-size:9px">&#x26A0; Build &#x2192; connect direct &#x2192; bypass report RLS</span></td>
                 </tr>
                 <tr>
-                  <td>Warehouse DENY + user la WS Admin</td>
-                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Admin bypass T-SQL DENY</span></td>
+                  <td>Warehouse DENY + user is WS Admin</td>
+                  <td><span class="tag tag--danger" style="font-size:9px">&#x274C; Admin bypasses T-SQL DENY</span></td>
                 </tr>
                 <tr>
                   <td>OneLake: Role A full table + Role B RLS</td>
                   <td><span class="tag tag--danger" style="font-size:9px">&#x274C; UNION &#x2192; full access wins, RLS ignored</span></td>
                 </tr>
                 <tr>
-                  <td>Share Report, khong share Semantic Model</td>
-                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; User xem report nhung khong build moi</span></td>
+                  <td>Share Report, without sharing Semantic Model</td>
+                  <td><span class="tag tag--ok" style="font-size:9px">&#x2713; User can view report but cannot build new ones</span></td>
                 </tr>
               </tbody>
             </table>
@@ -1004,7 +1004,7 @@
       </div>
     </section>
 
-    <p class="bottom-tip">Click vao bat ky layer nao de expand &middot; moi layer deu doc lap, co the expand dong thoi</p>
+    <p class="bottom-tip">Click any layer to expand &middot; all layers are independent and can be expanded simultaneously</p>
 
   </main>
 
